@@ -98,7 +98,6 @@ const deleteProduct = async (id) => {
           <th class="px-6 py-3">Name</th>
           <th class="px-6 py-3">Category</th>
           <th class="px-6 py-3">Price</th>
-          <!-- <th class="px-6 py-3">Stock</th> -->
           <th class="px-6 py-3">Created At</th>
           <th class="px-6 py-3 text-right">Actions</th>
         </tr>

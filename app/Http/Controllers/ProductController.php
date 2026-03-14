@@ -20,6 +20,7 @@ class ProductController extends Controller
     $search = $request->search;
 
     $products = Product::query()
+    ->with(['category'])
         ->when($search, function ($query, $search) {
             $query->where('name','like',"%{$search}%")
                   ->orWhere('description','like',"%{$search}%")

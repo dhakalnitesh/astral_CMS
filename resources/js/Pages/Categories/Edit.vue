@@ -1,14 +1,30 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import axios from 'axios'
 import { route } from 'ziggy-js'
 
-const emit = defineEmits(['created'])
+const emit = defineEmits(['updated'])
 
-const name = ref('')
-const description = ref('')
+const props = defineProps({
+  category: Object
+})
+
+const name = ref(props.category.name || '')
+const description = ref(props.category.name ||'')
 const errors = ref({})
 const loading = ref(false)
+
+/* Load category data when modal opens */
+watch(
+  () => props.category,
+  (category) => {
+    if (category) {
+      name.value = category.name
+      description.value = category.description
+    }
+  },
+  { immediate: true }
+)
 
 const submitForm = async () => {
 
@@ -17,20 +33,19 @@ const submitForm = async () => {
     loading.value = true
     errors.value = {}
 
-    await axios.post(route('categories.store'), {
+    await axios.put(route('categories.update', props.category.id), {
       name: name.value,
       description: description.value
     })
 
-    emit('created') // notify index page
-
-    name.value = ''
-    description.value = ''
+    emit('updated')
 
   } catch (e) {
 
     if (e.response?.status === 422) {
       errors.value = e.response.data.errors
+    } else {
+      alert('Something went wrong')
     }
 
   } finally {
@@ -40,14 +55,17 @@ const submitForm = async () => {
 }
 </script>
 
+
 <template>
 
 <div class="space-y-4">
 
 <h2 class="text-lg font-semibold">
-Add Category
+Edit Category
 </h2>
 
+<!-- Category Name -->
+<div>
 <input
 v-model="name"
 type="text"
@@ -58,27 +76,32 @@ class="w-full border rounded-lg px-3 py-2"
 <p v-if="errors.name" class="text-red-500 text-sm">
 {{ errors.name[0] }}
 </p>
+</div>
 
 
+<!-- Description -->
+<div>
 <textarea
 v-model="description"
 rows="3"
-placeholder="Description"
+placeholder="Category Description"
 class="w-full border rounded-lg px-3 py-2"
 />
 
 <p v-if="errors.description" class="text-red-500 text-sm">
 {{ errors.description[0] }}
 </p>
+</div>
 
 
+<!-- Submit -->
 <button
 @click="submitForm"
 :disabled="loading"
-class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
+class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
 >
 
-{{ loading ? 'Creating...' : 'Create Category' }}
+{{ loading ? 'Updating...' : 'Save Changes' }}
 
 </button>
 

@@ -4,6 +4,10 @@ import { route } from 'ziggy-js'
 import axios from 'axios'
 import { ref, watch } from 'vue'
 
+import Modal from '@/Components/Common/Modal.vue'
+import CreateCategory from './Create.vue'
+import EditCategory from './Edit.vue'
+
 import {
   PencilSquareIcon,
   TrashIcon,
@@ -18,6 +22,11 @@ const props = defineProps({
 
 const search = ref(props.filters?.search || '')
 
+const showCreateModal = ref(false)
+const showEditModal = ref(false)
+
+const selectedCategory = ref(null)
+
 /* SEARCH */
 watch(search, (value) => {
   router.get(
@@ -29,14 +38,51 @@ watch(search, (value) => {
 
 /* DELETE */
 const deleteCategory = async (id) => {
+
   if (!confirm('Delete this category?')) return
 
   try {
+
     await axios.delete(route('categories.destroy', id))
-    router.reload({ only: ['categories'] })
+
+    router.reload({
+      only: ['categories']
+    })
+
   } catch (error) {
+
     alert('Failed to delete category')
+
   }
+
+}
+
+/* OPEN EDIT */
+const openEdit = (category) => {
+  selectedCategory.value = category
+  showEditModal.value = true
+}
+
+/* CREATED */
+const categoryCreated = () => {
+
+  showCreateModal.value = false
+
+  router.reload({
+    only: ['categories']
+  })
+
+}
+
+/* UPDATED */
+const categoryUpdated = () => {
+
+  showEditModal.value = false
+
+  router.reload({
+    only: ['categories']
+  })
+
 }
 </script>
 
@@ -47,14 +93,13 @@ const deleteCategory = async (id) => {
 
 <!-- TITLE -->
 <h1 class="text-2xl font-bold mb-6 text-gray-800">
-Products
+Categories
 </h1>
 
 
 <!-- SEARCH + ADD -->
 <div class="flex items-center mb-6">
 
-<!-- SEARCH FIELD -->
 <div class="relative flex-1 mr-4">
 
 <input
@@ -70,10 +115,8 @@ class="w-5 h-5 text-gray-400 absolute left-3 top-2.5"
 
 </div>
 
-
-<!-- ADD PRODUCT BUTTON -->
-<Link
-:href="route('categories.create')"
+<button
+@click="showCreateModal = true"
 class="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
 >
 
@@ -81,10 +124,9 @@ class="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover
 
 Add Category
 
-</Link>
+</button>
 
 </div>
-
 
 
 <!-- TABLE -->
@@ -95,8 +137,8 @@ Add Category
 <thead class="bg-gray-50 text-left text-sm text-gray-600">
 
 <tr>
+<th class="px-6 py-3">SN</th>
 <th class="px-6 py-3">Name</th>
-
 <th class="px-6 py-3">Description</th>
 <th class="px-6 py-3 text-right">Actions</th>
 </tr>
@@ -107,42 +149,36 @@ Add Category
 <tbody>
 
 <tr
-v-for="product in products"
-:key="product.id"
+v-for="{category,index} in categories"
+:key="category.id"
 class="border-t hover:bg-gray-50"
 >
-
+<td class="px-6 py-4">{{ index+1 }}</td>
 <td class="px-6 py-3">
-{{ product.name }}
-</td>
-
-<td class="px-6 py-3">
-Rs. {{ product.price }}
+{{ category.name }}
 </td>
 
 <td class="px-6 py-3 text-gray-600">
-{{ product.description }}
+{{ category.description }}
 </td>
-
 
 <td class="px-6 py-3">
 
 <div class="flex justify-end gap-4">
 
 <!-- EDIT -->
-<Link
-:href="route('products.edit', product.id)"
+<button
+@click="openEdit(category)"
 class="text-blue-600 hover:text-blue-800"
 >
 
 <PencilSquareIcon class="w-5 h-5"/>
 
-</Link>
-
+</button>
 
 <!-- DELETE -->
 <button
-@click="deleteProduct(product.id)"
+@click="deleteCategory(category.id)"
 class="text-red-600 hover:text-red-800"
 >
 
@@ -157,10 +193,14 @@ class="text-red-600 hover:text-red-800"
 </tr>
 
 
-<tr v-if="products.length === 0">
-<td colspan="4" class="text-center py-6 text-gray-500">
-No products found
+<tr v-if="categories.length === 0">
+
+<td colspan="3" class="text-center py-6 text-gray-500">
+
+No categories found
+
 </td>
+
 </tr>
 
 </tbody>
@@ -168,6 +208,34 @@ No products found
 </table>
 
 </div>
+
+
+<!-- CREATE MODAL -->
+<Modal
+:show="showCreateModal"
+@close="showCreateModal = false"
+>
+
+<CreateCategory
+@created="categoryCreated"
+/>
+
+</Modal>
+
+
+<!-- EDIT MODAL -->
+<Modal
+:show="showEditModal"
+@close="showEditModal = false"
+>
+
+<EditCategory
+:category="selectedCategory"
+@updated="categoryUpdated"
+/>
+
+</Modal>
+
 
 </div>
 

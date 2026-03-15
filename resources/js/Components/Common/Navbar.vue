@@ -1,20 +1,43 @@
-<!doctype html>
-<html lang="en">
+<script setup>
+import { ref } from "vue";
+import { Link } from "@inertiajs/vue3";
+import { Bars3Icon, BellIcon, UserCircleIcon } from "@heroicons/vue/24/outline";
 
-<head>
-  <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/logo.svg" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="preconnect" href="https://fonts.bunny.net">
-  <link href="https://fonts.bunny.net/css?family=public-sans:400,500,600,700" rel="stylesheet" />
-  <title>Vue Dashboard Template</title>
-  <meta name="description" content="A professional dashboard template built with Nuxt UI, featuring multiple pages, data visualization, and comprehensive management capabilities for creating powerful admin interfaces.">
-  <script type="module" crossorigin src="/assets/index-bXsmiFg6.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-CHLkYQwX.css">
-</head>
+const isSidebarOpen = ref(true);
 
-<body>
-  <div id="app" class="isolate"></div>
-</body>
+function toggleSidebar() {
+  isSidebarOpen.value = !isSidebarOpen.value;
+}
+</script>
 
-</html>
+<template>
+  <!-- TOP NAVBAR -->
+  <header class="fixed top-0 left-0 right-0 z-40 bg-white font-bold shadow-md flex items-center justify-between px-6 py-4">
+    
+    <!-- Sidebar Toggle + Brand -->
+    <div class="flex items-center gap-4">
+      <button @click="toggleSidebar" class="p-2 rounded-md hover:bg-gray-100">
+        <Bars3Icon class="w-6 h-6 text-gray-700"/>
+      </button>
+      <div class="flex flex-col">
+        <h1 class="text-lg text-gray-800">Astral Tech Soft</h1>
+        <p class="text-xs text-gray-500">Customer Management System</p>
+      </div>
+    </div>
+
+    <!-- Navbar Actions -->
+    <div class="flex items-center gap-4">
+      <button class="p-2 rounded-md hover:bg-gray-100">
+        <BellIcon class="w-6 h-6 text-gray-700"/>
+      </button>
+      <Link href="#" class="flex items-center gap-2 hover:bg-gray-100 p-2 rounded-md">
+        <UserCircleIcon class="w-6 h-6 text-gray-700"/>
+        <span>Admin</span>
+      </Link>
+    </div>
+    
+  </header>
+
+  <!-- SPACER for sticky navbar -->
+  <div class="h-20"></div> <!-- matches header height -->
+</template>

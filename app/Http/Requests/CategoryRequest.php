@@ -29,5 +29,11 @@ class CategoryRequest extends FormRequest
         ];
 
     }
+    public function messages(): array   
+    {
+        return [
+            'name.required'=>'Name is required'
+        ];
+    }
  
 }

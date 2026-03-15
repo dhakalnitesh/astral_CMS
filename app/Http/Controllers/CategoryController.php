@@ -13,58 +13,69 @@ class CategoryController extends Controller
      * Display a listing of the resource.
      */
     public function index(Request $request)
-{
-    $search = $request->search;
+    {
+        $search = $request->search;
+        $perPage = $request->input('per_page', 10);
 
-    $categories = Category::query()
-        ->when($search, function ($query, $search) {
-            $query->where('name','like',"%{$search}%")
-                  ->orWhere('description','like',"%{$search}%");
-        })
-        ->latest()
-        ->get();
+        $categories = Category::query()
+            ->when($search, function ($query, $search) {
+                $query->where('name', 'like', "%{$search}%")
+                      ->orWhere('description', 'like', "%{$search}%");
+            })
+            ->latest()
+            ->paginate($perPage)
+            ->withQueryString();
 
-    return Inertia::render('Categories/Index', [
-        'categories' => $categories,
-        'filters' => [
-            'search' => $search
-        ]
-    ]);
-}
+        return Inertia::render('Categories/Index', [
+            'categories' => $categories,
+            'filters' => [
+                'search' => $search,
+                'per_page' => $perPage,
+            ]
+        ]);
+    }
 
     /**
      * Show the form for creating a new resource.
      */
     public function create()
     {
-        //
+        // If using a modal, you might not need to return a page
+        return Inertia::render('Categories/Create');
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(CategoryRequest $request)
     {
-        $category = Category::create($request->all());
-        return redirect()->back();
+        $validated = $request->validated();
+
+        Category::create($validated);
+
+        return redirect()->route('categories.index')
+                         ->with('success', 'Category created successfully.');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(CategoryRequest $request)
+    public function show(Category $category)
     {
-            Category::create($request->validated());
-
-    return redirect()->route('categories.index');
+        // Show a single category
+        return Inertia::render('Categories/Show', [
+            'category' => $category
+        ]);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Category $category)
     {
-        //
+        return Inertia::render('Categories/Edit', [
+            'category' => $category
+        ]);
     }
 
     /**
@@ -72,8 +83,12 @@ class CategoryController extends Controller
      */
     public function update(CategoryRequest $request, Category $category)
     {
-        $category->update($request->validated());
-        
+        $validated = $request->validated();
+
+        $category->update($validated);
+
+        return redirect()->route('categories.index')
+                         ->with('success', 'Category updated successfully.');
     }
 
     /**
@@ -81,6 +96,9 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
-        $category->delete($category);
+        $category->delete();
+
+        return redirect()->route('categories.index')
+                         ->with('success', 'Category deleted successfully.');
     }
 }

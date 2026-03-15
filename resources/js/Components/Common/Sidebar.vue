@@ -26,9 +26,9 @@ const navGroups = [
   {
     title: "Management",
     links: [
+      { label: "Categories", to: route("categories.index"), icon: UsersIcon },
       { label: "Products", to: route("products.index"), icon: CubeIcon },
       { label: "Customers", to: route("customers.index"), icon: UsersIcon },
-            { label: "Categories", to: route("categories.index"), icon: UsersIcon },
 
     ],
 
@@ -45,7 +45,7 @@ isOpen ? 'w-64' : 'w-20'
 >
 
 <!-- HEADER -->
-<div class="flex items-center justify-between px-4 py-5 border-b border-gray-200">
+<div class="flex items-center justify-between px-4 py-4 border-b border-gray-200">
 
 <div v-if="isOpen">
 <h1 class="text-xl font-bold text-gray-800">⭐ Astral</h1>
@@ -63,7 +63,7 @@ class="p-2 rounded-md hover:bg-gray-100 text-gray-700"
 
 
 <!-- NAVIGATION -->
-<nav class="flex-1 px-3 py-6 overflow-y-auto">
+<nav class="flex-1 px-3 py-3 overflow-y-auto">
 
 <div v-for="group in navGroups" :key="group.title" class="mb-6">
 

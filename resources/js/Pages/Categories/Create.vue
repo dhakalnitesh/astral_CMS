@@ -1,87 +1,89 @@
 <script setup>
-import { ref } from 'vue'
-import axios from 'axios'
+import { useForm } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
 
 const emit = defineEmits(['created'])
 
-const name = ref('')
-const description = ref('')
-const errors = ref({})
-const loading = ref(false)
+// ================= FORM =================
+const form = useForm({
+  name: '',
+  description: ''
+})
 
-const submitForm = async () => {
-
-  try {
-
-    loading.value = true
-    errors.value = {}
-
-    await axios.post(route('categories.store'), {
-      name: name.value,
-      description: description.value
-    })
-
-    emit('created') // notify index page
-
-    name.value = ''
-    description.value = ''
-
-  } catch (e) {
-
-    if (e.response?.status === 422) {
-      errors.value = e.response.data.errors
+// ================= SUBMIT =================
+const submit = () => {
+  form.post(route('categories.store'), {
+    onSuccess: () => {
+      form.reset()
+      emit('created')
     }
-
-  } finally {
-    loading.value = false
-  }
-
+  })
 }
 </script>
 
 <template>
 
-<div class="space-y-4">
+<!-- Center form and limit width -->
+<div class="flex justify-center p-4">
+  <form @submit.prevent="submit" class="space-y-6 w-full max-w-md p-6 border rounded-xl shadow-lg">
 
-<h2 class="text-lg font-semibold">
-Add Category
-</h2>
+    <!-- ================= TITLE ================= -->
+    <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">
+      Add Category
+    </h2>
 
-<input
-v-model="name"
-type="text"
-placeholder="Category Name"
-class="w-full border rounded-lg px-3 py-2"
-/>
+    <!-- ================= CATEGORY NAME ================= -->
+    <div>
+      <label class="block text-xs font-medium text-slate-600 mb-1">
+        Category Name
+      </label>
+      <input
+        v-model="form.name"
+        type="text"
+        placeholder="Enter category name"
+        class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+      />
+      <p v-if="form.errors.name" class="text-red-500 text-xs mt-1">
+        {{ form.errors.name }}
+      </p>
+    </div>
 
-<p v-if="errors.name" class="text-red-500 text-sm">
-{{ errors.name[0] }}
-</p>
+    <!-- ================= DESCRIPTION ================= -->
+    <div>
+      <label class="block text-xs font-medium text-slate-600 mb-1">
+        Description
+      </label>
+      <textarea
+        v-model="form.description"
+        rows="3"
+        placeholder="Category description"
+        class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+      ></textarea>
+      <p v-if="form.errors.description" class="text-red-500 text-xs mt-1">
+        {{ form.errors.description }}
+      </p>
+    </div>
 
+    <!-- ================= FOOTER ================= -->
+    <div class="flex justify-end gap-3 pt-4 border-t">
+      <button
+        type="button"
+        @click="$emit('created')"
+        class="px-4 py-2 text-sm rounded-lg border border-slate-300 hover:bg-slate-100"
+      >
+        Cancel
+      </button>
 
-<textarea
-v-model="description"
-rows="3"
-placeholder="Description"
-class="w-full border rounded-lg px-3 py-2"
-/>
+      <button
+        type="submit"
+        :disabled="form.processing"
+        class="px-5 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+      >
+        {{ form.processing ? 'Saving...' : 'Create Category' }}
+      </button>
+    </div>
 
-<p v-if="errors.description" class="text-red-500 text-sm">
-{{ errors.description[0] }}
-</p>
-
-
-<button
-@click="submitForm"
-:disabled="loading"
-class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
->
-
-{{ loading ? 'Creating...' : 'Create Category' }}
-
-</button>
-
+  </form>
 </div>
 
 </template>

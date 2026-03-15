@@ -16,7 +16,7 @@ import {
 } from '@heroicons/vue/24/outline'
 
 const props = defineProps({
-  categories: Array,
+  categories: Object,
   filters: Object
 })
 
@@ -127,7 +127,7 @@ Add Category
 </button>
 
 </div>
-
+<!-- <pre>{{ categories }}</pre> -->
 
 <!-- TABLE -->
 <div class="bg-white shadow rounded-lg overflow-hidden">
@@ -149,11 +149,11 @@ Add Category
 <tbody>
 
 <tr
-v-for="{category,index} in categories"
+v-for="(category, index) in categories.data"
 :key="category.id"
 class="border-t hover:bg-gray-50"
 >
-<td class="px-6 py-4">{{ index+1 }}</td>
+<td class="px-6 py-4">{{ index + 1 }}</td>
 <td class="px-6 py-3">
 {{ category.name }}
 </td>
@@ -208,6 +208,24 @@ No categories found
 </table>
 
 </div>
+
+ <div v-if="categories.total > categories.per_page" class="flex justify-center mt-4 space-x-2">
+      <Link
+        v-for="link in categories.links"
+        :key="link.label"
+        :href="link.url || ''"
+        v-html="link.label"
+        class="px-3 py-1 border rounded text-sm hover:bg-gray-100 transition"
+        :class="{
+          'bg-blue-600 text-white': link.active,
+          'text-gray-400 pointer-events-none': !link.url
+        }"
+      />
+    </div>
+
+    <div class="text-center text-sm text-gray-500 mt-2">
+      Showing {{ categories.from }} to {{ categories.to }} of {{ categories.total }} category
+    </div>
 
 
 <!-- CREATE MODAL -->

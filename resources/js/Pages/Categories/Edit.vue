@@ -1,110 +1,96 @@
 <script setup>
-import { ref, watch } from 'vue'
-import axios from 'axios'
+import { useForm } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
 
 const emit = defineEmits(['updated'])
 
+// ================= FORM =================
+// Initialize with existing category data via props
 const props = defineProps({
-  category: Object
+  category: {
+    type: Object,
+    required: true
+  }
 })
 
-const name = ref(props.category.name || '')
-const description = ref(props.category.name ||'')
-const errors = ref({})
-const loading = ref(false)
+const form = useForm({
+  name: props.category.name || '',
+  description: props.category.description || ''
+})
 
-/* Load category data when modal opens */
-watch(
-  () => props.category,
-  (category) => {
-    if (category) {
-      name.value = category.name
-      description.value = category.description
+// ================= SUBMIT =================
+const submit = () => {
+  form.put(route('categories.update', props.category.id), {
+    onSuccess: () => {
+      emit('updated')
     }
-  },
-  { immediate: true }
-)
-
-const submitForm = async () => {
-
-  try {
-
-    loading.value = true
-    errors.value = {}
-
-    await axios.put(route('categories.update', props.category.id), {
-      name: name.value,
-      description: description.value
-    })
-
-    emit('updated')
-
-  } catch (e) {
-
-    if (e.response?.status === 422) {
-      errors.value = e.response.data.errors
-    } else {
-      alert('Something went wrong')
-    }
-
-  } finally {
-    loading.value = false
-  }
-
+  })
 }
 </script>
 
-
 <template>
 
-<div class="space-y-4">
+<!-- Center form and limit width -->
+<div class="flex justify-center p-4">
+  <form @submit.prevent="submit" class="space-y-6 w-full max-w-md p-6 border rounded-xl shadow-lg">
 
-<h2 class="text-lg font-semibold">
-Edit Category
-</h2>
+    <!-- ================= TITLE ================= -->
+    <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">
+      Edit Category
+    </h2>
 
-<!-- Category Name -->
-<div>
-<input
-v-model="name"
-type="text"
-placeholder="Category Name"
-class="w-full border rounded-lg px-3 py-2"
-/>
+    <!-- ================= CATEGORY NAME ================= -->
+    <div>
+      <label class="block text-xs font-medium text-slate-600 mb-1">
+        Category Name
+      </label>
+      <input
+        v-model="form.name"
+        type="text"
+        placeholder="Enter category name"
+        class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+      />
+      <p v-if="form.errors.name" class="text-red-500 text-xs mt-1">
+        {{ form.errors.name }}
+      </p>
+    </div>
 
-<p v-if="errors.name" class="text-red-500 text-sm">
-{{ errors.name[0] }}
-</p>
-</div>
+    <!-- ================= DESCRIPTION ================= -->
+    <div>
+      <label class="block text-xs font-medium text-slate-600 mb-1">
+        Description
+      </label>
+      <textarea
+        v-model="form.description"
+        rows="3"
+        placeholder="Category description"
+        class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+      ></textarea>
+      <p v-if="form.errors.description" class="text-red-500 text-xs mt-1">
+        {{ form.errors.description }}
+      </p>
+    </div>
 
+    <!-- ================= FOOTER ================= -->
+    <div class="flex justify-end gap-3 pt-4 border-t">
+      <button
+        type="button"
+        @click="$emit('updated')"
+        class="px-4 py-2 text-sm rounded-lg border border-slate-300 hover:bg-slate-100"
+      >
+        Cancel
+      </button>
 
-<!-- Description -->
-<div>
-<textarea
-v-model="description"
-rows="3"
-placeholder="Category Description"
-class="w-full border rounded-lg px-3 py-2"
-/>
+      <button
+        type="submit"
+        :disabled="form.processing"
+        class="px-5 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+      >
+        {{ form.processing ? 'Saving...' : 'Update Category' }}
+      </button>
+    </div>
 
-<p v-if="errors.description" class="text-red-500 text-sm">
-{{ errors.description[0] }}
-</p>
-</div>
-
-
-<!-- Submit -->
-<button
-@click="submitForm"
-:disabled="loading"
-class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
->
-
-{{ loading ? 'Updating...' : 'Save Changes' }}
-
-</button>
-
+  </form>
 </div>
 
 </template>

@@ -15,9 +15,10 @@ class Customer extends Model
         'address',
         'notes',
         'status',
+        'category_id'
     ];
 public function services()
 {
-    return $this->hasMany(Product::class);
+    return $this->hasMany(Service::class);
 }
 }

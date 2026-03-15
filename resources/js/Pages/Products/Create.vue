@@ -1,148 +1,201 @@
 <script setup>
-import { ref } from 'vue'
-import axios from 'axios'
+import { useForm } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
 
 const emit = defineEmits(['created'])
-
-const name = ref('')
-const price = ref('')
-const description = ref('')
-const category_id = ref('')
-const errors = ref({})
 
 const props = defineProps({
   categories: Array
 })
 
-const submitForm = async () => {
+/* ================= FORM ================= */
 
-  try {
+const form = useForm({
+  name: '',
+  price: '',
+  code: '',
+  description: '',
+  category_id: ''
+})
 
-    errors.value = {}
+/* ================= SUBMIT ================= */
 
-    const data = {
-      name: name.value,
-      price: price.value,
-      category_id: category_id.value,
-      description: description.value
+const submit = () => {
+
+  form.post(route('products.store'), {
+
+    onSuccess: () => {
+
+      form.reset()
+
+      emit('created')
+
     }
 
-    await axios.post(route('products.store'), data)
-
-    alert('Product created successfully')
-
-    emit('created') // notify parent
-
-    name.value = ''
-    price.value = ''
-    description.value = ''
-    category_id.value = ''
-
-  } catch (e) {
-
-    if (e.response && e.response.status === 422) {
-      errors.value = e.response.data.errors
-    } else {
-      alert("Something went wrong")
-    }
-
-  }
+  })
 
 }
 </script>
 
+
 <template>
-<div class="p-4">    
-    <div class="w-full max-w-xl bg-white rounded-xl shadow-lg p-8">
 
-      <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">
-        Add New Product
-      </h2>
+<form @submit.prevent="submit" class="space-y-6">
 
-      <form @submit.prevent="submitForm" class="space-y-5">
+<!-- ================= PRODUCT INFO ================= -->
 
-        <!-- Product Name -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
-            Product Name
-          </label>
-          <input
-            type="text"
-            v-model="name"
-            placeholder="Enter product name"
-            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-          />
-          <p v-if="errors.name" class="text-red-500 text-sm mt-1">
-            {{ errors.name[0] }}
-          </p>
-        </div>
+<div>
 
-        <!-- Product Price -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
-            Product Price
-          </label>
-          <input
-            type="number"
-            v-model="price"
-            placeholder="Enter product price"
-            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-          />
-          <p v-if="errors.price" class="text-red-500 text-sm mt-1">
-            {{ errors.price[0] }}
-          </p>
-        </div>
+<h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">
+Add New Product
+</h2>
 
-        <!-- Category -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
-            Category
-          </label>
-          <select
-            v-model="category_id"
-            class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-          >
-            <option value="" disabled>Select category</option>
-            <option v-for="cat in categories" :key="cat.id" :value="cat.id">
-              {{ cat.name }}
-            </option>
-          </select>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-2">
 
-          <p v-if="errors.category_id" class="text-red-500 text-sm mt-1">
-            {{ errors.category_id[0] }}
-          </p>
-        </div>
+<!-- CATEGORY -->
+<div>
 
-        <!-- Description -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
-            Product Description
-          </label>
-          <textarea
-            v-model="description"
-            rows="4"
-            placeholder="Enter product description"
-            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-          ></textarea>
+<label class="block text-xs font-medium text-slate-400 mb-1">
+Category
+</label>
 
-          <p v-if="errors.description" class="text-red-500 text-sm mt-1">
-            {{ errors.description[0] }}
-          </p>
-        </div>
+<select
+v-model="form.category_id"
+class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+>
 
-        <!-- Submit Button -->
-        <div class="pt-2">
-          <button
-            type="submit"
-            class="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-lg hover:bg-blue-700 transition duration-200"
-          >
-            Create Product
-          </button>
-        </div>
+<option value="">Select Category</option>
 
-      </form>
-    </div>
+<option
+v-for="category in categories"
+:key="category.id"
+:value="category.id"
+>
+{{ category.name }}
+</option>
 
-  </div>
+</select>
+
+<p v-if="form.errors.category_id" class="text-red-500 text-xs mt-1">
+{{ form.errors.category_id }}
+</p>
+
+</div>
+
+
+<!-- PRODUCT NAME -->
+<div>
+
+<label class="block text-xs font-medium text-slate-600 mb-1">
+Product Name
+</label>
+
+<input
+v-model="form.name"
+type="text"
+placeholder="Enter product name"
+class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+/>
+
+<p v-if="form.errors.name" class="text-red-500 text-xs mt-1">
+{{ form.errors.name }}
+</p>
+
+</div>
+
+
+<!-- PRODUCT CODE -->
+<div>
+
+<label class="block text-xs font-medium text-slate-600 mb-1">
+Product Code
+</label>
+
+<input
+v-model="form.code"
+type="text"
+placeholder="Enter product code"
+class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+/>
+
+<p v-if="form.errors.code" class="text-red-500 text-xs mt-1">
+{{ form.errors.code }}
+</p>
+
+</div>
+
+
+<!-- PRICE -->
+<div>
+
+<label class="block text-xs font-medium text-slate-600 mb-1">
+Price
+</label>
+
+<input
+v-model="form.price"
+type="number"
+placeholder="Enter product price"
+class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+/>
+
+<p v-if="form.errors.price" class="text-red-500 text-xs mt-1">
+{{ form.errors.price }}
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- ================= DESCRIPTION ================= -->
+
+<div class="border-t pt-5">
+
+<h4 class="text-sm font-semibold text-slate-700 mb-3">
+Description
+</h4>
+
+<textarea
+v-model="form.description"
+rows="2"
+placeholder="Product description"
+class="w-full border border-slate-300 rounded-lg px-3 py-1 text-sm"
+/>
+
+<p v-if="form.errors.description" class="text-red-500 text-xs mt-1">
+{{ form.errors.description }}
+</p>
+
+</div>
+
+
+<!-- ================= FOOTER ================= -->
+
+<div class="flex justify-end gap-3 pt-4 border-t">
+
+<button
+type="button"
+@click="$emit('created')"
+class="px-4 py-2 text-sm rounded-lg border border-slate-300 hover:bg-slate-100"
+>
+Cancel
+</button>
+
+<button
+type="submit"
+:disabled="form.processing"
+class="px-5 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+>
+
+{{ form.processing ? 'Saving...' : 'Create Product' }}
+
+</button>
+
+</div>
+
+</form>
+
 </template>

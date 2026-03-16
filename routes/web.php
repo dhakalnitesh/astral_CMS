@@ -2,8 +2,11 @@
 
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\LocationController;
+
 
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -31,9 +34,10 @@ Route::middleware('auth')->group(function () {
 Route::resource('/products',ProductController::class);
 Route::resource('/categories',CategoryController::class);
 Route::resource('/customers',CustomerController::class);
-// Route::middleware('[auth]')->group(function (){
-//     Route::get('/categories',[CategoryController::class,'index'])
-//     ->name('categories.index');
-// });
+Route::resource('/employees', EmployeeController::class);
+
+Route::get('/provinces', [LocationController::class, 'provinces']);
+Route::get('/districts/{province}', [LocationController::class, 'districts']);
+Route::get('/municipals/{district}', [LocationController::class, 'municipals']);
 require __DIR__.'/auth.php';
 

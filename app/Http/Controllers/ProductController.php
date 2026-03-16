@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ProductRequest;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Employee;
+
 
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -15,39 +17,47 @@ class ProductController extends Controller
      * Display a listing of the resource.
      */
 
-  public function index(Request $request)
-{
-    $search = $request->search;
+    public function index(Request $request)
+    {
+        $search = $request->search;
 
-    $products = Product::query()
-    ->with(['category'])
-        ->when($search, function ($query, $search) {
-            $query->where('name','like',"%{$search}%")
-                  ->orWhere('description','like',"%{$search}%")
-                  ->orWhere('price','like',"%{$search}%");
-        })
-        ->latest()
-        ->paginate(10)->withQueryString();
+        $products = Product::query()
+            ->with(['category'])
+            ->when($search, function ($query, $search) {
+                $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('price', 'like', "%{$search}%");
+            })
+            ->latest()
+            ->paginate(10)->withQueryString();
 
-    $categories = Category::select('id','name')->get();
+        $categories = Category::select('id', 'name')->get();
 
-    return Inertia::render('Products/Index', [
-        'products' => $products,
-        'filters' => [
-            'search' => $search
-        ],
-        'categories' => $categories
-    ]);
-}
+        return Inertia::render('Products/Index', [
+            'products' => $products,
+            'filters' => [
+                'search' => $search
+            ],
+            'categories' => $categories
+        ]);
+    }
 
     /**
      * Show the form for creating a new resource.
      */
     public function create()
     {
-        $products = Product::all();
-        $categories = Category::all();
-        return Inertia::render("Products/Create", ["products" => $products, "categories" => $categories]);
+        // Fetch categories for the category dropdown
+        $categories = Category::select('id', 'name')->get();
+
+        // Fetch employees for the project lead dropdown
+        $employees = Employee::select('id', 'name')->get();
+
+        // Pass them to Inertia
+        return Inertia::render('Products/Create', [
+            'categories' => $categories,
+            'employees' => $employees,
+        ]);
     }
 
     /**
@@ -55,9 +65,27 @@ class ProductController extends Controller
      */
     public function store(ProductRequest $request)
     {
-        // dd($request->all());
-        $product = Product::create($request->validated());
-        return redirect()->route('products.index');
+        dd($request->all());
+        // $product = Product::create($request->validated());
+        // return redirect()->route('products.index');
+
+        $data = $request->validated();
+        // Handle new category
+        if (!empty($data['new_category'])) {
+            // Create the new category
+            $category = Category::create([
+                'name' => $data['new_category']
+            ]);
+            // Replace category_id with new category's id
+            $data['category_id'] = $category->id;
+        }
+        // Remove new_category from data before saving product
+        unset($data['new_category']);
+
+        // Create product
+        Product::create($data);
+
+        return redirect()->route('products.index')->with('success', 'Product created successfully!');
     }
 
     /**
@@ -81,16 +109,16 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(ProductRequest $request,Product $product)
+    public function update(ProductRequest $request, Product $product)
     {
-         $product->update($request->validated());
+        $product->update($request->validated());
         return redirect()->route('products.index')->with('success', 'Product updated successfully.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy( Product $product)
+    public function destroy(Product $product)
     {
         $product->delete($product);
     }

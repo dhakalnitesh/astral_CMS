@@ -23,20 +23,25 @@ class ProductRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'category_id'=>'required',
-            'name'=>'required',
-            'price'=> 'required',
-            'code'=>'nullable',
-            'description'=>'string|nullable'
+            'name' => 'required|string|max:255',
+            'code' => 'required|string|max:100',
+            'price' => 'required|numeric',
+            'description' => 'nullable|string',
+            'category_id' => 'nullable|exists:categories,id',
+            'new_category' => 'nullable|string|max:255',
+            'project_lead' => 'required|exists:employees,id',
+            'total_developers' => 'nullable|integer',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
         ];
     }
-    public function messages(): array   
+    public function messages(): array
     {
         return [
-            'name.required'=>'Name is required',
-            'price.required'=>'Price is required',
+            'name.required' => 'Name is required',
+            'price.required' => 'Price is required',
 
-            
+
         ];
     }
 }

@@ -22,6 +22,7 @@
     },
     "dependencies": {
         "@heroicons/vue": "^2.2.0",
+        "pinia": "^3.0.4",
         "ziggy-js": "^2.6.2"
     }
 }

@@ -3,40 +3,43 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Employee extends Model
 {
+    use SoftDeletes;
 
     protected $fillable = [
-        'first_name',
-        'last_name',
+        'full_name',
         'email',
         'phone',
         'date_of_birth',
         'gender',
-        'employee_code',
         'designation',
         'department',
-        'role',
         'joining_date',
         'end_date',
         'salary',
         'experience_years',
-        'address',
-        'city',
-        'state',
-        'country',
-        'notes',
+        'province_id',
+        'district_id',
+        'municipal_id',
+        'street',
+        'tole',
     ];
 
-    // Optional: Full name accessor
-    public function getFullNameAttribute()
+    public function province()
     {
-        return "{$this->first_name} {$this->last_name}";
+        return $this->belongsTo(\App\Models\Province::class);
     }
 
-    public function products()
+    public function district()
     {
-        return $this->belongsToMany(Product::class, 'employee_product', 'employee_id', 'product_id')->withPivot('assigned_date', 'role');
+        return $this->belongsTo(\App\Models\District::class);
+    }
+
+    public function municipal()
+    {
+        return $this->belongsTo(\App\Models\Municipal::class);
     }
 }

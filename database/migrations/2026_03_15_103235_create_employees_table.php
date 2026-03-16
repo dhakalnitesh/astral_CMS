@@ -12,9 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('employees', function (Blueprint $table) {
+
             $table->id();
-            $table->string('first_name');
-            $table->string('last_name');
+
+            $table->string('full_name');
             $table->string('email')->unique();
             $table->string('phone')->nullable();
             $table->date('date_of_birth')->nullable();
@@ -22,16 +23,22 @@ return new class extends Migration
 
             $table->string('designation')->nullable();
             $table->string('department')->nullable();
-            $table->string('role')->nullable(); // e.g., developer, manager
+            $table->string('role')->nullable();
             $table->date('joining_date')->nullable();
-            $table->date('end_date')->nullable(); // if contract ends
+            $table->date('end_date')->nullable();
             $table->decimal('salary', 12, 2)->nullable();
             $table->integer('experience_years')->nullable();
 
-            $table->string('address')->nullable();
-            $table->string('city')->nullable();
-            $table->string('state')->nullable();
-            $table->string('country')->nullable();
+            $table->unsignedInteger('province_id')->nullable();
+            $table->unsignedInteger('district_id')->nullable();
+            $table->unsignedInteger('municipal_id')->nullable();
+
+            $table->foreign('province_id')->references('id')->on('provinces')->nullOnDelete();
+            $table->foreign('district_id')->references('id')->on('districts')->nullOnDelete();
+            $table->foreign('municipal_id')->references('id')->on('municipals')->nullOnDelete();
+            $table->string('tole')->nullable();
+
+            $table->string('address_line')->nullable();
             $table->text('notes')->nullable();
 
             $table->timestamps();

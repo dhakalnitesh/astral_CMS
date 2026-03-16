@@ -26,6 +26,7 @@ const navGroups = [
   {
     title: "Management",
     links: [
+      { label: "Employees", to: route("employees.index"), icon: UsersIcon },
       { label: "Categories", to: route("categories.index"), icon: UsersIcon },
       { label: "Products", to: route("products.index"), icon: CubeIcon },
       { label: "Customers", to: route("customers.index"), icon: UsersIcon },

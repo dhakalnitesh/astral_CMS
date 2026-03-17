@@ -12,24 +12,22 @@ class Product extends Model
     protected $table = 'products';
 
     protected $fillable = [
-        'category_id',       // stores category id
         'name',
-        'price',
         'code',
+        'price',
+        'project_lead',      
         'description',
-        'project_lead',      // stores employee id
+        'category_id',      
         'total_developers',
         'start_date',
         'end_date',
+        'status',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
     ];
 
-    /**
-     * Relationship: Product belongs to a category
-     */
     public function category()
     {
         return $this->belongsTo(Category::class, 'category_id')->withDefault();
@@ -46,9 +44,9 @@ class Product extends Model
     /**
      * Relationship: Product belongs to a project lead (Employee)
      */
-    public function projectLead()
+    public function employees()
     {
-        return $this->belongsTo(Employee::class, 'project_lead')->withDefault();
+        return $this->belongsTo(Employee::class,'project_lead');
     }
     // This way, if a product has no project lead or category, $product->projectLead->name won’t throw an error.If we use the withDefault() then.
 }

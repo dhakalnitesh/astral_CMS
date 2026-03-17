@@ -11,9 +11,10 @@ return new class extends Migration
         Schema::table('products', function (Blueprint $table) {
             $table->unsignedBigInteger('project_lead')->nullable()->change();
             $table->foreign('project_lead')
-                  ->references('id')
-                  ->on('employees')
-                  ->cascadeOnDelete();
+                ->references('id')
+                ->on('employees')
+                ->cascadeOnDelete();
+            $table->enum('status', ['pending', 'completed'])->default('pending');
         });
     }
 

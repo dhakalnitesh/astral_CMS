@@ -22,7 +22,7 @@ class ProductController extends Controller
         $search = $request->search;
 
         $products = Product::query()
-            ->with(['category'])
+            ->with(['category','employees'])
             ->when($search, function ($query, $search) {
                 $query->where('name', 'like', "%{$search}%")
                     ->orWhere('description', 'like', "%{$search}%")
@@ -32,13 +32,16 @@ class ProductController extends Controller
             ->paginate(10)->withQueryString();
 
         $categories = Category::select('id', 'name')->get();
+        $employees = Employee::select('id','full_name')->get();
+// dd($employees->all());
 
         return Inertia::render('Products/Index', [
             'products' => $products,
             'filters' => [
                 'search' => $search
             ],
-            'categories' => $categories
+            'categories' => $categories,
+            'employees'=>$employees,
         ]);
     }
 
@@ -65,28 +68,29 @@ class ProductController extends Controller
      */
     public function store(ProductRequest $request)
     {
-        dd($request->all());
+        // dd($request->all());
         // $product = Product::create($request->validated());
         // return redirect()->route('products.index');
 
         $data = $request->validated();
         // Handle new category
         if (!empty($data['new_category'])) {
-            // Create the new category
             $category = Category::create([
                 'name' => $data['new_category']
             ]);
+            // dd($category->all());
             // Replace category_id with new category's id
             $data['category_id'] = $category->id;
         }
         // Remove new_category from data before saving product
         unset($data['new_category']);
-
-        // Create product
+        // dd($data);
         Product::create($data);
 
-        return redirect()->route('products.index')->with('success', 'Product created successfully!');
-    }
+        return back()->with([
+            'success' => 'Product created successfully!',
+            'refresh_index' => true
+        ]);    }
 
     /**
      * Display the specified resource.
@@ -112,8 +116,12 @@ class ProductController extends Controller
     public function update(ProductRequest $request, Product $product)
     {
         $product->update($request->validated());
-        return redirect()->route('products.index')->with('success', 'Product updated successfully.');
-    }
+
+        return back()->with([
+            'success' => 'Product updated successfully!',
+            'refresh_index' => true
+        ]);  
+    }    
 
     /**
      * Remove the specified resource from storage.

@@ -24,15 +24,16 @@ class ProductRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'code' => 'required|string|max:100',
+            'code' => 'nullable|string|max:100',
             'price' => 'required|numeric',
+            'project_lead' => 'required|exists:employees,id',
             'description' => 'nullable|string',
             'category_id' => 'nullable|exists:categories,id',
             'new_category' => 'nullable|string|max:255',
-            'project_lead' => 'required|exists:employees,id',
             'total_developers' => 'nullable|integer',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date',
+            'status' => 'required|in:pending,completed',
         ];
     }
     public function messages(): array

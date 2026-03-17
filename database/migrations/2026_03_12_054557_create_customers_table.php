@@ -13,15 +13,30 @@ return new class extends Migration
     {
         Schema::create('customers', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            
+            $table->string('name'); // required
+            $table->string('email')->unique(); // required
+            $table->date('date_of_birth')->nullable();
+            $table->enum('gender', ['male', 'female', 'other'])->nullable();
+
+            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // required
             $table->string('company_name')->nullable();
-            $table->string('email')->unique();
             $table->string('phone')->nullable();
-            $table->string('address')->nullable();
-            $table->string('notes')->nullable();
-          
+            $table->text('notes')->nullable();
+            $table->string('status')->nullable();
+
+            $table->foreignId('category_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('product_id')->nullable()->constrained()->nullOnDelete();
+
+            $table->foreignId('province_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('district_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('municipal_id')->nullable()->constrained()->nullOnDelete();
+            
+            $table->string('street')->nullable();
+            $table->string('tole')->nullable();
+
             $table->timestamps();
+            $table->softDeletes(); // Optional: for safe deletion
         });
     }
 

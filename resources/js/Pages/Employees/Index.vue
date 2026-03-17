@@ -49,7 +49,7 @@ const deleteEmployee = async (id) => {
 
     <!-- TITLE -->
     <div class="px-6 py-4 border-b border-gray-200">
-      <h1 class="text-2xl font-bold text-gray-800">Employees</h1>
+      <h1 class="text-2xl font-bold text-gray-800">Employees Information</h1>
     </div>
 
     <!-- SEARCH + ACTIONS -->

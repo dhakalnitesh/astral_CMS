@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('employees', function (Blueprint $table) {
@@ -19,7 +16,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('phone')->nullable();
             $table->date('date_of_birth')->nullable();
-            $table->string('gender')->nullable();
+            $table->enum('gender', ['male', 'female', 'other'])->nullable();
 
             $table->string('designation')->nullable();
             $table->string('department')->nullable();
@@ -29,26 +26,18 @@ return new class extends Migration
             $table->decimal('salary', 12, 2)->nullable();
             $table->integer('experience_years')->nullable();
 
-            $table->unsignedInteger('province_id')->nullable();
-            $table->unsignedInteger('district_id')->nullable();
-            $table->unsignedInteger('municipal_id')->nullable();
-
-            $table->foreign('province_id')->references('id')->on('provinces')->nullOnDelete();
-            $table->foreign('district_id')->references('id')->on('districts')->nullOnDelete();
-            $table->foreign('municipal_id')->references('id')->on('municipals')->nullOnDelete();
+            $table->foreignId('province_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('district_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('municipal_id')->nullable()->constrained()->nullOnDelete();
             $table->string('tole')->nullable();
-
             $table->string('address_line')->nullable();
             $table->text('notes')->nullable();
 
             $table->timestamps();
-            $table->softDeletes();
+            $table->softDeletes(); // keep employee for historical purposes
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('employees');

@@ -6,87 +6,49 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class CustomerStoreRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Prepare data before validation.
-     */
- 
-
-    /**
-     * Validation rules
-     */
-    public function rules(): array
+     public function rules(): array
     {
         return [
-
-            'type' => [
-                'required',
-                'in:individual,business'
-            ],
-
-            'name' => [
-                'required',
-                'string',
-                'max:255'
-            ],
-
-            'email' => [
-                'nullable',
-                'email',
-                'max:255',
-                'unique:customers,email'
-            ],
-
-            'phone' => [
-                'nullable',
-                'string',
-                'max:20'
-            ],
-
-            'company_name' => [
-                'required_if:type,business',
-                'nullable',
-                'string',
-                'max:255'
-            ],
-
-            'address' => [
-                'nullable',
-                'string',
-                'max:500'
-            ],
+            'type' => 'required|in:individual,business',
+            'name' => 'required_if:type,individual|string|max:255',
+            'email' => 'required|email|unique:customers,email',
+            'phone' => 'nullable|string|max:255',
+            'alternate_phone' => 'nullable|string|max:255',
+            'date_of_birth' => 'nullable|date',
+            'gender' => 'nullable|in:male,female,other',
+            'company_name' => 'nullable|string|max:255',
+            'company_registration_number' => 'nullable|string|max:255',
+            'vat_number' => 'nullable|string|max:255',
+            'status' => 'nullable|in:active,inactive',
+            'category_id' => 'nullable|exists:categories,id',
+            'product_id' => 'nullable|exists:products,id',
+            'province_id' => 'nullable|exists:provinces,id',
+            'district_id' => 'nullable|exists:districts,id',
+            'municipal_id' => 'nullable|exists:municipals,id',
+            'street' => 'nullable|string|max:255',
+            'tole' => 'nullable|string|max:255',
+            'postal_code' => 'nullable|string|max:20',
+            'notes' => 'nullable|string',
         ];
     }
 
-    /**
-     * Custom error messages
-     */
     public function messages(): array
     {
         return [
-
-            'name.required' => 'Customer name is required.',
-
-            'email.email' => 'Please enter a valid email address.',
-
-            'company_name.required_if' =>
-            'Company name is required when customer type is Business.',
-
-            'type.required' => 'Please select customer type.',
-
-            'status.required' => 'Customer status is required.',
+            'name.required_if' => 'Full name is required for individual customers.',
+            'email.required' => 'An email address is required.',
+            'email.email' => 'Please provide a valid email address.',
+            'email.unique' => 'This email address is already in use.',
+            'category_id.exists' => 'The selected category is invalid.',
+            'product_id.exists' => 'The selected product is invalid.',
+            'province_id.exists' => 'The selected province is invalid.',
+            'district_id.exists' => 'The selected district is invalid.',
+            'municipal_id.exists' => 'The selected municipal is invalid.',
         ];
     }
-
-    /**
-     * Friendly attribute names
-     */
-
 }

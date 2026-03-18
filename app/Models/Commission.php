@@ -6,22 +6,23 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Payment extends Model
+class Commission extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $table = 'payments';
+    protected $table = 'commissions';
     protected $fillable = [
         'service_id',
-        'amount',
-        'payment_type',
-        'method',
-        'payment_date',
-        'note',
+        'agent_name',
+        'commission_percentage',
+        'commission_amount',
+        'paid_date',
     ];
+
     protected $casts = [
-        'amount' => 'decimal:2',
-        'payment_date' => 'date',
+        'commission_percentage' => 'decimal:2',
+        'commission_amount' => 'decimal:2',
+        'paid_date' => 'date',
     ];
     public function service()
     {

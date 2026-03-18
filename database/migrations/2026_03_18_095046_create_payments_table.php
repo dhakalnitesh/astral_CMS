@@ -13,11 +13,17 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->enum('type',['paid','partial','pending'])->default('pending');
-            $table->decimal('amount',10,2)->default(0);
-            $table->decimal('paid_amount',10,2)->default(0);
-            $table->decimal('remaining_amount',10,2)->default(0);
-            $table->date('payment_date')->nullable();
+
+            $table->foreignId('service_id')->constrained();
+
+            $table->decimal('amount', 12, 2);
+            $table->enum('payment_type', ['full', 'partial']);
+            $table->enum('method', ['cash', 'bank', 'online']);
+            $table->date('payment_date');
+
+            $table->text('note')->nullable();
+
+            $table->softDeletes();
             $table->timestamps();
         });
     }

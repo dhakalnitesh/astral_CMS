@@ -30,6 +30,7 @@ const navGroups = [
       { label: "Categories", to: route("categories.index"), icon: UsersIcon },
       { label: "Products", to: route("products.index"), icon: CubeIcon },
       { label: "Customers", to: route("customers.index"), icon: UsersIcon },
+      { label: "Services", to: route("services.index"), icon: CubeIcon },
 
     ],
 

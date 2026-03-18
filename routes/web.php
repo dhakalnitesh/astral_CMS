@@ -6,8 +6,7 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\LocationController;
-
-
+use App\Http\Controllers\ServiceController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -35,6 +34,7 @@ Route::resource('/products',ProductController::class);
 Route::resource('/categories',CategoryController::class);
 Route::resource('/customers',CustomerController::class);
 Route::resource('/employees', EmployeeController::class);
+Route::resource('/services', ServiceController::class);
 
 Route::get('/provinces', [LocationController::class, 'provinces']);
 Route::get('/districts/{province}', [LocationController::class, 'districts']);

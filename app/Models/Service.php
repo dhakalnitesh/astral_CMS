@@ -32,7 +32,11 @@ class Service extends Model
 
     public function customer()
     {
-        return $this->belongsTo(Customer::class)->withTrashed();
+        return $this->belongsTo(Customer::class);
+    }
+    public function products()
+    {
+        return $this->belongsTo(Product::class);
     }
 
     public function details()
@@ -48,27 +52,13 @@ class Service extends Model
         return $this->hasOne(ServiceCharge::class);
     }
 
-    /**
-     * Payments made for this service
-     */
     public function payments()
     {
         return $this->hasMany(Payment::class);
     }
 
-    /**
-     * Commissions for this service
-     */
     public function commissions()
     {
         return $this->hasMany(Commission::class);
-    }
-
-    /**
-     * Calculate due amount dynamically
-     */
-    public function getDueAmountAttribute()
-    {
-        return max($this->total_amount - $this->paid_amount, 0);
     }
 }

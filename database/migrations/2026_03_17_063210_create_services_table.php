@@ -4,6 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+use function Symfony\Component\Clock\now;
+
 return new class extends Migration
 {
     /**
@@ -20,9 +22,9 @@ return new class extends Migration
                   ->constrained()
                   ->nullOnDelete();
 
-            $table->string('service_code')->unique();
+            $table->string('service_code')->nullable()->unique();
 
-            $table->date('start_date');
+            $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
 
             $table->enum('status', ['active', 'expired', 'cancelled'])->default('active');

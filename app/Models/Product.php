@@ -50,4 +50,9 @@ class Product extends Model
         return $this->belongsTo(Employee::class,'project_lead');
     }
     // This way, if a product has no project lead or category, $product->projectLead->name won’t throw an error.If we use the withDefault() then.
+
+    public function customers()
+    {
+        return $this->hasMany(Customer::class);
+    }
 }

@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Service;
 use App\Models\User;
+use App\Models\Product;
+use App\Models\Customer;
 use App\Models\ServiceDetail;
 use App\Models\ServiceCharge;
 use Illuminate\Support\Facades\DB;
@@ -20,8 +22,11 @@ class ServiceController extends Controller
     public function index(Request $request)
     {
         $services=Service::all();
+        $products=Product::all();
+        $customers=Customer::all();
+
         $services->load(['customers','products']);
-        return Inertia::render("Services/Create", ['services'=> $services]);
+        return Inertia::render("Services/Create", ['services'=> $services,'products'=> $products,'customers'=> $customers]);
     }
 
     /**
@@ -37,53 +42,33 @@ class ServiceController extends Controller
      */
     public function store(ServiceStoreRequest $request)
 {
-    try {
+  dd($request->validated());
+  $service = Service::create([
+    'customer_id'=> $request->customer_id,
+    'start_date'=> $request->start_date,
+    'end_date'=>$request->end_date,
+  ]);
+  dd($service->all());
+  foreach($request->projects as $project)
+  {
+    ServiceDetail::create([
+        'service_id'=>$service->id,
+        'product_id'=> $project['product_id'],
+        'project_name'=> $project['project_name'],
+        'base_price'=> $project['base_price'],
+        'discount' => $project['discount'] ?? 0,
+        'final_price' => $project['final_price'],
+    ]);
+  }
+foreach($request->charges as $charge)
+    {
 
-        DB::beginTransaction();
-
-        $service = Service::create([
-            'customer_id' => $request->customer_id,
-            'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
-            'total_amount' => $request->total_amount,
-            'paid_amount' => 0,
-            'due_amount' => $request->total_amount,
-        ]);
-
-        // store projects
-        foreach ($request->projects as $project) {
-
-            ServiceDetail::create([
-                'service_id' => $service->id,
-                'product_id' => $project['product_id'],
-                'project_name' => $project['project_name'] ?? null,
-                'base_price' => $project['base_price'],
-                'discount' => $project['discount'] ?? 0,
-                'final_price' => $project['final_price'],
-            ]);
-        }
-
-        // store charges
         ServiceCharge::create([
-            'service_id' => $service->id,
-            'installation_charge' => $request->charges['installation_charge'],
-            'hosting_charge' => $request->charges['hosting_charge'],
-            'server_charge' => $request->charges['server_charge'],
-            'maintenance_charge' => $request->charges['maintenance_charge'],
+          'hosting_charge'=>$charge['hosting_charge']?? null,
+          'installation_charge'=>$charge['installation_charge']?? null,
+          'server_charge'=> $charge['server_charge']?? null,
+          'maintenance_charge'=> $charge['maintenance_charge']?? null,
         ]);
-
-        DB::commit();
-
-        return redirect()->route('services.index')
-            ->with('success', 'Service created successfully');
-
-    } catch (\Exception $e) {
-
-        DB::rollBack();
-
-        Log::error('Service Store Error: ' . $e->getMessage());
-
-        return back()->withErrors('Something went wrong. Try again.');
     }
 }
 

@@ -30,15 +30,11 @@ class Service extends Model
         'due_amount' => 'decimal:2',
     ];
 
-    // Relationshi
     public function customer()
     {
         return $this->belongsTo(Customer::class)->withTrashed();
     }
 
-    /**
-     * Service details (products/projects linked to this service)
-     */
     public function details()
     {
         return $this->hasMany(ServiceDetail::class);

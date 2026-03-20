@@ -34,10 +34,10 @@ class Service extends Model
     {
         return $this->belongsTo(Customer::class);
     }
-    public function products()
-    {
-        return $this->belongsTo(Product::class);
-    }
+    // public function products()
+    // {
+    //     return $this->belongsTo(Product::class);
+    // }
 
     public function details()
     {

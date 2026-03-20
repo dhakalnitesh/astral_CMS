@@ -13,6 +13,10 @@ const form = useForm({
   customer_id: '',
   start_date: '',
   end_date: '',
+  paid_amount:'',
+  due_amount:'',
+  total_amount:'',
+  initial_payment: 0,
 
   projects: [
     {
@@ -42,6 +46,7 @@ const addProject = () => {
     base_price: 0,
     discount: 0,
     final_price: 0,
+    
 
     charges: {
       installation_charge: 0,
@@ -130,6 +135,20 @@ const getProjectTotal = (p) => {
   return base + charges
 }
 
+//paid and due calculation
+const paidAmount = computed(() => {
+  return Number(form.initial_payment || 0)
+})
+
+const dueAmount = computed(() => {
+  return totalAmount.value - paidAmount.value
+})
+watch(() => form.initial_payment, (val) => {
+  if (val > totalAmount.value) {
+    form.initial_payment = totalAmount.value
+  }
+})
+
 // Calculate Final
 const calculateFinal = (p) => {
   const base = Number(p.base_price) || 0
@@ -148,6 +167,8 @@ const totalAmount = computed(() => {
 // Submit
 const submit = () => {
   form.total_amount = totalAmount.value
+  form.paid_amount = paidAmount.value
+  form.due_amount = dueAmount.value
 
   form.post(route('services.store'), {
     onSuccess: () => {
@@ -291,7 +312,7 @@ const submit = () => {
               </div>
             </div>
 
-            <!-- Remove Project Button -->
+             <!-- Remove Project Button -->
             <div v-show="form.projects.length > 1" class="text-right mt-2">
               <button type="button" @click="removeProject(i)" class="btn-remove text-red-600 text-sm">
                 Remove
@@ -299,6 +320,30 @@ const submit = () => {
             </div>
             <div class="mt-4 text-lg font-semibold">
               Project {{ i + 1 }} <br> Total: <span class="text-green-600">Rs. {{ getProjectTotal(p) }}</span>
+            </div>
+            
+            <!-- PAYMENT SECTION -->
+            <div class="mt-6">
+              <h2 class="section-title">Payment Information</h2>
+
+              <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+                <div>
+                  <label class="label">Initial Payment</label>
+                  <input type="number" v-model="form.initial_payment" class="input" />
+                </div>
+
+                <div>
+                  <label class="label">Paid Amount</label>
+                  <input type="text" :value="paidAmount" readonly class="input bg-gray-100" />
+                </div>
+
+                <div>
+                  <label class="label">Due Amount</label>
+                  <input type="text" :value="dueAmount" readonly class="input bg-gray-100" />
+                </div>
+
+              </div>
             </div>
 
           </div>
@@ -308,7 +353,7 @@ const submit = () => {
         <!-- Summary Total -->
         <div class="flex justify-end">
           <div>
-            <h2 class="section-title">Total Amount</h2>
+            <h2 class="section-title">Total Project Amount</h2>
 
             <div class="text-lg font-semibold">
               Total: <span class="text-green-600">Rs. {{ totalAmount }}</span>
@@ -329,62 +374,62 @@ const submit = () => {
   </div>
 </template>
 
-  <style>
-  .card {
-    background: white;
-    padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  }
+<style>
+.card {
+  background: white;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
 
-  .section-title {
-    font-weight: 600;
-    margin-bottom: 15px;
-    font-size: 16px;
-  }
+.section-title {
+  font-weight: 600;
+  margin-bottom: 15px;
+  font-size: 16px;
+}
 
-  .input {
-    border: 1px solid #ddd;
-    padding: 10px;
-    border-radius: 6px;
-    width: 100%;
-  }
+.input {
+  border: 1px solid #ddd;
+  padding: 10px;
+  border-radius: 6px;
+  width: 100%;
+}
 
-  .label {
-    display: block;
-    font-size: 14px;
-    margin-bottom: 4px;
-  }
+.label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
 
-  .box {
-    border: 1px solid #eee;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 10px;
-  }
+.box {
+  border: 1px solid #eee;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
 
-  .btn-primary {
-    background: #2563eb;
-    color: white;
-    padding: 8px 16px;
-    border-radius: 6px;
-  }
+.btn-primary {
+  background: #2563eb;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+}
 
-  .btn-primary:hover {
-    background: #1d4ed8;
-  }
+.btn-primary:hover {
+  background: #1d4ed8;
+}
 
-  .btn-remove {
-    background: transparent;
-    border: 1px solid #f87171;
-    color: #f87171;
-    padding: 4px 10px;
-    border-radius: 6px;
-    cursor: pointer;
-  }
+.btn-remove {
+  background: transparent;
+  border: 1px solid #f87171;
+  color: #f87171;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
 
-  .btn-remove:hover {
-    background: #ef1c1c;
-    color: white;
-  }
+.btn-remove:hover {
+  background: #ef1c1c;
+  color: white;
+}
 </style>

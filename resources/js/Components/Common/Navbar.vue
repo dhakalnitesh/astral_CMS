@@ -20,7 +20,7 @@ function toggleSidebar() {
         <Bars3Icon class="w-6 h-6 text-gray-700"/>
       </button>
       <div class="flex flex-col">
-        <h1 class="text-lg text-gray-800">Astral Tech Soft</h1>
+        <h1 class="text-lg text-gray-800">Astral TechSoft</h1>
         <p class="text-xs text-gray-500">Customer Management System</p>
       </div>
     </div>

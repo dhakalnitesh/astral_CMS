@@ -13,9 +13,9 @@ const form = useForm({
   customer_id: '',
   start_date: '',
   end_date: '',
-  paid_amount:'',
-  due_amount:'',
-  total_amount:'',
+  paid_amount: '',
+  due_amount: '',
+  total_amount: '',
   initial_payment: 0,
 
   projects: [
@@ -26,6 +26,7 @@ const form = useForm({
       base_price: 0,
       discount: 0,
       final_price: 0,
+      payment: 0,
 
       charges: {
         installation_charge: 0,
@@ -46,7 +47,8 @@ const addProject = () => {
     base_price: 0,
     discount: 0,
     final_price: 0,
-    
+
+
 
     charges: {
       installation_charge: 0,
@@ -59,7 +61,9 @@ const addProject = () => {
 
 // Filter Products
 const getFilteredProducts = (categoryId) => {
-  return props.products.filter(p => p.category_id === categoryId)
+  return props.products.filter(
+    p => Number(p.category_id) === Number(categoryId)
+  )
 }
 
 // Remove Project
@@ -137,17 +141,29 @@ const getProjectTotal = (p) => {
 
 //paid and due calculation
 const paidAmount = computed(() => {
-  return Number(form.initial_payment || 0)
+  return form.projects.reduce((sum, p) => {
+    return sum + Number(p.payment || 0)
+  }, 0)
 })
+//it is for 
+watch(
+  () => form.projects.map(p => p.payment),
+  () => {
+    form.projects.forEach(p => {
+      const max = getProjectTotal(p)
+
+      if (Number(p.payment) > max) {
+        p.payment = max
+      }
+    })
+  },
+  { deep: true }
+)
 
 const dueAmount = computed(() => {
   return totalAmount.value - paidAmount.value
 })
-watch(() => form.initial_payment, (val) => {
-  if (val > totalAmount.value) {
-    form.initial_payment = totalAmount.value
-  }
-})
+
 
 // Calculate Final
 const calculateFinal = (p) => {
@@ -192,9 +208,9 @@ const submit = () => {
 
         <!-- SERVICE INFO -->
         <div>
-          <h2 class="section-title">Service Information</h2>
+          <h2 class="section-title ">Service Information</h2>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
 
             <div>
               <label class="label">Customer</label>
@@ -231,7 +247,7 @@ const submit = () => {
 
           <div v-for="(p, i) in form.projects" :key="i" class="box">
             <!-- PROJECT HEADING -->
-            <div class="mb-3">
+            <div class="mb-3 ">
               <h3 class="text-lg font-semibold">
                 Project {{ i + 1 }}
               </h3>
@@ -312,16 +328,16 @@ const submit = () => {
               </div>
             </div>
 
-             <!-- Remove Project Button -->
+            <!-- Remove Project Button -->
             <div v-show="form.projects.length > 1" class="text-right mt-2">
               <button type="button" @click="removeProject(i)" class="btn-remove text-red-600 text-sm">
-                Remove
+                Remove Project
               </button>
             </div>
             <div class="mt-4 text-lg font-semibold">
               Project {{ i + 1 }} <br> Total: <span class="text-green-600">Rs. {{ getProjectTotal(p) }}</span>
             </div>
-            
+
             <!-- PAYMENT SECTION -->
             <div class="mt-6">
               <h2 class="section-title">Payment Information</h2>
@@ -330,10 +346,10 @@ const submit = () => {
 
                 <div>
                   <label class="label">Initial Payment</label>
-                  <input type="number" v-model="form.initial_payment" class="input" />
+                  <input type="number" v-model="p.payment" class="input" />
                 </div>
 
-                <div>
+                <!-- <div>
                   <label class="label">Paid Amount</label>
                   <input type="text" :value="paidAmount" readonly class="input bg-gray-100" />
                 </div>
@@ -341,6 +357,18 @@ const submit = () => {
                 <div>
                   <label class="label">Due Amount</label>
                   <input type="text" :value="dueAmount" readonly class="input bg-gray-100" />
+                </div> -->
+
+
+                <div>
+                  <label class="label">Paid Amount</label>
+                  <input type="number" v-model="p.payment" class="input" />
+                </div>
+
+                <div>
+                  <label class="label">Due Amount</label>
+                  <input type="text" :value="getProjectTotal(p) - (p.payment || 0)" readonly
+                    class="input bg-gray-100" />
                 </div>
 
               </div>

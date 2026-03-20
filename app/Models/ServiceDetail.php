@@ -18,11 +18,20 @@ class ServiceDetail extends Model
         'base_price',
         'discount',
         'final_price',
+       'installation_charge',
+        'hosting_charge',
+        'server_charge',
+        'maintenance_charge',
     ];
     protected $casts = [
         'base_price' => 'decimal:2',
         'discount' => 'decimal:2',
         'final_price' => 'decimal:2',
+        'maintenance_charge'=>'decimal:2',
+        'installation_charge' => 'decimal:2',
+        'server_charge' => 'decimal:2',
+        'hosting_charge' => 'decimal:2',
+
     ];
     public function service()
     {

@@ -12,10 +12,11 @@ import {
 } from '@heroicons/vue/24/outline'
 
 const props = defineProps({
-  services: Object,  // Assuming the services object includes projects
-  filters: Object
+  services: Object,
+  filters: Object,
+  details:Object,
 })
-
+// console.log('details data:',props.details);
 const search = ref(props.filters?.search || '')
 const perPage = ref(props.filters?.perPage || 10)
 
@@ -39,12 +40,18 @@ const deleteService = async (id) => {
     alert('Failed to delete service')
   }
 }
+
+// Payment Status Badge
+const getStatus = (service) => {
+  if (service.due_amount <= 0) return 'Paid'
+  if (service.paid_amount > 0) return 'Partial'
+  return 'Due'
+}
 </script>
 
 <template>
 <div class="p-6">
 
-  <!-- CARD -->
   <div class="bg-white shadow-md rounded-lg overflow-hidden">
 
     <!-- TITLE -->
@@ -52,20 +59,16 @@ const deleteService = async (id) => {
       <h1 class="text-2xl font-bold text-gray-800">Services Information</h1>
     </div>
 
-    <!-- SEARCH + ACTIONS -->
+    <!-- SEARCH -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between px-6 py-4 gap-4 border-b border-gray-200">
 
-      <!-- Left: Search + Rows -->
       <div class="flex flex-col sm:flex-row gap-4 sm:gap-2 flex-1">
-
-        <div class="relative flex-1">
-          <input
-            v-model="search"
-            type="text"
-            placeholder="Search services..."
-            class="w-full border border-gray-300 rounded-lg pl-10 pr-4 py-2 shadow-sm focus:ring focus:ring-blue-200"
-          />
-        </div>
+        <input
+          v-model="search"
+          type="text"
+          placeholder="Search services..."
+          class="w-full border border-gray-300 rounded-lg pl-4 pr-4 py-2 shadow-sm focus:ring focus:ring-blue-200"
+        />
 
         <select v-model="perPage" class="w-28 border border-gray-300 rounded-lg py-2 px-2">
           <option value="5">5 rows</option>
@@ -73,18 +76,14 @@ const deleteService = async (id) => {
           <option value="25">25 rows</option>
           <option value="50">50 rows</option>
         </select>
-
       </div>
 
-      <!-- Right: Add Service -->
-      <div class="flex-shrink-0">
-        <Link
-          :href="route('services.create')"
-          class="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition shadow"
-        >
-          <PlusIcon class="w-5 h-5"/> Add Service
-        </Link>
-      </div>
+      <Link
+        :href="route('services.create')"
+        class="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition shadow"
+      >
+        <PlusIcon class="w-5 h-5"/> Add Service
+      </Link>
 
     </div>
 
@@ -92,46 +91,108 @@ const deleteService = async (id) => {
     <div class="overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-200 text-sm text-gray-700">
 
-        <thead class="bg-gray-100 uppercase text-gray-600 text-left text-xs">
+        <thead class="bg-gray-100 uppercase text-gray-600 text-xs">
           <tr>
             <th class="px-6 py-3">SN</th>
             <th class="px-6 py-3">Customer</th>
-            <th class="px-6 py-3">Start Date</th>
-            <th class="px-6 py-3">End Date</th>
             <th class="px-6 py-3">Projects</th>
+            <th class="px-6 py-3">Total</th>
+            <th class="px-6 py-3">Paid</th>
+            <th class="px-6 py-3">Due</th>
+            <th class="px-6 py-3">Status</th>
+            <th class="px-6 py-3">Start</th>
+            <th class="px-6 py-3">End</th>
             <th class="px-6 py-3 text-right">Actions</th>
           </tr>
         </thead>
 
         <tbody class="bg-white divide-y divide-gray-200">
+
           <tr
             v-for="(service, index) in services.data"
             :key="service.id"
-            class="hover:bg-gray-50 transition-colors"
+            class="hover:bg-gray-50 transition"
           >
-            <td class="px-6 py-4">{{ services.from + index }}</td>
-            <td class="px-6 py-4 font-medium">{{ service.customer.name }}</td>
-            <td class="px-6 py-4">{{ service.start_date || '—' }}</td>
-            <td class="px-6 py-4">{{ service.end_date || '—' }}</td>
-
-            <!-- Project Names -->
+            <!-- SN -->
             <td class="px-6 py-4">
-              <div v-if="service.projects?.length">
-                <ul class="list-disc pl-4">
-                  <li v-for="project in service.projects" :key="project.id">
-                    {{ project.project_name }}
+              {{ services.from + index }}
+            </td>
+
+            <!-- Customer -->
+            <td class="px-6 py-4 font-medium">
+              {{ service.customer?.name }}
+            </td>
+
+            <!-- Projects -->
+            <td class="px-6 py-4">
+              <div v-if="service.details?.length">
+                <ul class="space-y-1">
+                  <li
+                    v-for="d in service.details"
+                    :key="d.id"
+                    class="flex justify-between"
+                  >
+                    <span>{{ d.product.name }}</span>
+                    <!-- <span class="text-gray-500 text-xs">
+                      Rs. {{ Number(d.final_price || 0) +
+                        Number(d.installation_charge || 0) +
+                        Number(d.hosting_charge || 0) +
+                        Number(d.server_charge || 0) +
+                        Number(d.maintenance_charge || 0)
+                      }}
+                    </span> -->
                   </li>
                 </ul>
+
+                <div class="text-xs text-gray-400 mt-1">
+                  {{ service.details.length }} project(s)
+                </div>
               </div>
-              <div v-else>
-                —
-              </div>
+              <div v-else>—</div>
+            </td>
+
+            <!-- Total -->
+            <td class="px-6 py-4 font-semibold text-green-600">
+              Rs. {{ service.total_amount }}
+            </td>
+
+            <!-- Paid -->
+            <td class="px-6 py-4 text-blue-600">
+              Rs. {{ service.paid_amount }}
+            </td>
+
+            <!-- Due -->
+            <td class="px-6 py-4 text-red-600">
+              Rs. {{ service.due_amount }}
+            </td>
+
+            <!-- Status -->
+            <td class="px-6 py-4">
+              <span
+                class="px-2 py-1 text-xs rounded-full"
+                :class="{
+                  'bg-green-100 text-green-700': getStatus(service) === 'Paid',
+                  'bg-yellow-100 text-yellow-700': getStatus(service) === 'Partial',
+                  'bg-red-100 text-red-700': getStatus(service) === 'Due'
+                }"
+              >
+                {{ getStatus(service) }}
+              </span>
+            </td>
+
+            <!-- Dates -->
+            <td class="px-6 py-4">
+              {{ service.date || '—' }}
             </td>
 
             <td class="px-6 py-4">
+              {{ service.date || '—' }}
+            </td>
+
+            <!-- ACTIONS -->
+            <td class="px-6 py-4">
               <div class="flex justify-end gap-3">
 
-                <!-- VIEW -->
                 <Link
                   :href="route('services.show', service.id)"
                   class="text-gray-600 hover:text-gray-800"
@@ -139,7 +200,6 @@ const deleteService = async (id) => {
                   <EyeIcon class="w-5 h-5"/>
                 </Link>
 
-                <!-- EDIT -->
                 <Link
                   :href="route('services.edit', service.id)"
                   class="text-blue-600 hover:text-blue-800"
@@ -147,7 +207,6 @@ const deleteService = async (id) => {
                   <PencilSquareIcon class="w-5 h-5"/>
                 </Link>
 
-                <!-- DELETE -->
                 <button
                   @click="deleteService(service.id)"
                   class="text-red-600 hover:text-red-800"
@@ -157,13 +216,16 @@ const deleteService = async (id) => {
 
               </div>
             </td>
+
           </tr>
 
+          <!-- EMPTY -->
           <tr v-if="services.data.length === 0">
-            <td colspan="6" class="text-center py-6 text-gray-500">
+            <td colspan="10" class="text-center py-6 text-gray-500">
               No services found
             </td>
           </tr>
+
         </tbody>
       </table>
     </div>
@@ -178,7 +240,7 @@ const deleteService = async (id) => {
         :key="link.label"
         :href="link.url || ''"
         v-html="link.label"
-        class="px-3 py-1 border rounded text-sm hover:bg-gray-100 transition"
+        class="px-3 py-1 border rounded text-sm hover:bg-gray-100"
         :class="{
           'bg-blue-600 text-white': link.active,
           'text-gray-400 pointer-events-none': !link.url

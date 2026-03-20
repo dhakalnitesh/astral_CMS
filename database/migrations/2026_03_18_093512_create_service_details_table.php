@@ -24,6 +24,10 @@ return new class extends Migration
             $table->decimal('base_price', 12, 2);
             $table->decimal('discount', 12, 2)->default(0);
             $table->decimal('final_price', 12, 2);
+             $table->decimal('installation_charge', 12, 2)->default(0);
+            $table->decimal('hosting_charge', 12, 2)->default(0);
+            $table->decimal('server_charge', 12, 2)->default(0);
+            $table->decimal('maintenance_charge', 12, 2)->default(0);
 
             $table->softDeletes();
             $table->timestamps();

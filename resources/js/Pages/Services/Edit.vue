@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useForm, router } from '@inertiajs/vue3'
-import { watch ,onMounted} from 'vue'
+import { watch,onMounted } from 'vue'
 
 const props = defineProps({
   customers: Array,
@@ -14,40 +14,50 @@ const form = useForm({
   customer_id: '',
   start_date: '',
   end_date: '',
-  paid_amount: '',
-  due_amount: '',
-  total_amount: '',
+  total_amount: 0,
+  paid_amount: 0,
+  due_amount: 0,
   initial_payment: 0,
 
   projects: []
 })
-//preload data as per the previous data of service
-onMounted(() => {
 
+// ✅ PRELOAD DATA
+onMounted(() => {
+if (!props.service || !props.products.length) return
   const s = props.service
 
   form.customer_id = s.customer_id
   form.start_date = s.start_date
   form.end_date = s.end_date
 
-  form.initial_payment = s.paid_amount // preload payment
+  form.initial_payment = s.paid_amount
 
-  // map projects
-  form.projects = s.details.map(d => ({
-    category_id: d.product?.category_id || '',
-    product_id: d.product_id,
-    project_name: d.project_name,
-    base_price: d.base_price,
-    discount: d.discount,
-    final_price: d.final_price,
+  // ✅ MAP PROJECTS (INCLUDING CHARGES)
+ form.projects = s.details.map(d => ({
+  id: d.id,
 
-    charges: {
-      installation_charge: d.installation_charge || 0,
-      hosting_charge: d.hosting_charge || 0,
-      server_charge: d.server_charge || 0,
-      maintenance_charge: d.maintenance_charge || 0
-    }
-  }))
+  category_id: d.product?.category_id
+    ? Number(d.product.category_id)
+    : '',
+
+  product_id: d.product_id
+    ? Number(d.product_id)
+    : '',
+
+  project_name: d.project_name,
+
+  base_price: d.base_price,
+  discount: d.discount,
+  final_price: d.final_price,
+
+  charges: {
+    installation_charge: d.installation_charge || 0,
+    hosting_charge: d.hosting_charge || 0,
+    server_charge: d.server_charge || 0,
+    maintenance_charge: d.maintenance_charge || 0,
+  }
+}))
 
 })
 
@@ -60,20 +70,23 @@ const addProject = () => {
     base_price: 0,
     discount: 0,
     final_price: 0,
+    payment:0,
     
 
     charges: {
       installation_charge: 0,
       hosting_charge: 0,
       server_charge: 0,
-      maintenance_charge: 0
+      maintenance_charge: 0,
     }
   })
 }
 
 // Filter Products
 const getFilteredProducts = (categoryId) => {
-  return props.products.filter(p => p.category_id === categoryId)
+  return props.products.filter(
+    p => Number(p.category_id) === Number(categoryId)
+  )
 }
 
 // Remove Project
@@ -96,7 +109,7 @@ const applyProductData = (p) => {
   // Recalculate final price
   calculateFinal(p)
 }
-// it wi;l update the base price if the product is selected next(  or if we switch the product name then)
+// it will update the base price if the product is selected next(  or if we switch the product name then)
 watch(
   () => form.projects.map(p => p.product_id),
   (newIds) => {
@@ -112,14 +125,21 @@ watch(
   { deep: true }
 )
 // It will watch for the categories change
+let isInitialLoad = true
+
 watch(
   () => form.projects.map(p => p.category_id),
   (newCategories, oldCategories) => {
+
+    if (isInitialLoad) {
+      isInitialLoad = false
+      return
+    }
+
     form.projects.forEach((p, index) => {
       const oldCategory = oldCategories?.[index]
       const newCategory = p.category_id
 
-      // If category is cleared
       if (!newCategory) {
         p.product_id = ''
         p.base_price = 0
@@ -127,7 +147,6 @@ watch(
         return
       }
 
-      // If category CHANGED (switching category)
       if (oldCategory !== newCategory) {
         p.product_id = ''
         p.base_price = 0
@@ -151,17 +170,29 @@ const getProjectTotal = (p) => {
 
 //paid and due calculation
 const paidAmount = computed(() => {
-  return Number(form.initial_payment || 0)
+  return form.projects.reduce((sum, p) => {
+    return sum + Number(p.payment || 0)
+  }, 0)
 })
 
 const dueAmount = computed(() => {
   return totalAmount.value - paidAmount.value
 })
-watch(() => form.initial_payment, (val) => {
-  if (val > totalAmount.value) {
-    form.initial_payment = totalAmount.value
-  }
-})
+
+//It prevent over payment per project
+watch(
+  () => form.projects.map(p => p.payment),
+  () => {
+    form.projects.forEach(p => {
+      const max = getProjectTotal(p)
+
+      if (Number(p.payment) > max) {
+        p.payment = max
+      }
+    })
+  },
+  { deep: true }
+)
 
 // Calculate Final
 const calculateFinal = (p) => {
@@ -344,7 +375,7 @@ const submit = () => {
 
                 <div>
                   <label class="label">Initial Payment</label>
-                  <input type="number" v-model="form.initial_payment" class="input" />
+                  <input type="number" v-model="p.payment" class="input" />
                 </div>
 
                 <div>
@@ -378,7 +409,7 @@ const submit = () => {
         <!-- SUBMIT -->
         <div class="flex justify-end pt-2">
           <button type="submit" class="btn-primary">
-            Update Service
+            Save Service
           </button>
         </div>
 

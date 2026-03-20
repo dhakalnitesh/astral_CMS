@@ -74,7 +74,7 @@ const submit = () => {
   if (hasError) return
 
   // Log the form data before submitting for debugging purposes
-  console.log("Form Data: ", form.data)
+  // console.log("Form Data: ", form.data)
 
   // Submit the form
   form.post(route('products.store'), {

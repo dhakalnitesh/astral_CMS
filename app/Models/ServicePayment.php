@@ -6,11 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Payment extends Model
+class ServicePayment extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $table = 'payments';
+    protected $table = 'service_payments';
     protected $fillable = [
         'service_id',
         'amount',
